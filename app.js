@@ -1,44 +1,47 @@
-const express = require('express')
-const exphbs  = require('express-handlebars')
-
-const app = express()
-
-const port = process.env.PORT || 5000
-
-
-const path = require('path')
-
-
-app.engine('handlebars', exphbs.engine());
-app.set('view engine', 'handlebars');
-
-// const harrymiddle = (req,res,next)=>{
-//     console.log(req)
-
-// }
-
-// app.use(express.static(path.join(__dirname, 'public')))
-
-app.use('/',require(path.join(__dirname,'routes/blog.js')))
-
-// // app.use(harrymiddle)
-
-// app.get('/hello/:name',(req,res) => {
-//     res.send(`${req.params.name}`)
-// })
-
-// // app.get('/hello/:name', (req, res) => {
-// //     // res.sendFile()
-    
-// // })
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var mongoose  = require('mongoose')
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+var studentsRouter = require('./routes/students');
+var studentModel = require('./models/student.model')
+var app = express();
 
 
-// app.get('/xx', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'index.html'))
-// })
+// mongoose.connect('mongodb://127.0.0.1:27017/Nivid')
 
 
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
-app.listen(port, () => {
-    console.log(`Listining on port ${port}`)
-})
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/students',studentsRouter);
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
